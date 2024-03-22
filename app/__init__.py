@@ -1,21 +1,21 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
+from .extensions import db, migrate, jwt, api_restx
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    
+    app.config.from_object('config.Config')
 
-#Configuration de la bdd
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:basset@localhost:5432/Immodb'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.init_app(app)
+    migrate.init_app(app, db)
+    jwt.init_app(app)
+    api_restx.init_app(app)
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+    
+    from .api.property_api import ns as property_ns
+    from .api.user_api import ns as user_ns
 
-app.config['JWT_SECRET_KEY'] = 'super-secret key'
-jwt = JWTManager(app)
+    api_restx.add_namespace(property_ns, path='/api/properties')
+    api_restx.add_namespace(user_ns, path='/api/users')
 
-from app.models import user, property
-from app.api import property_api, user_api
-from app import routes
-
+    return app

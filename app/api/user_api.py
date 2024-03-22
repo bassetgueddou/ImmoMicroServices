@@ -1,13 +1,31 @@
 from flask import jsonify, request
 from app import db, app
-from app.models import user
+from app.models.user import User
+from datetime import datetime
 
-@app.route('/api/<user_id>/user', methods=['PUT'])
+
+@app.route('/api/users', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    birthdate = datetime.strptime(data['birthdate'], '%Y-%m-%d').date()
+    new_user = User(
+        firstname=data['firstname'],
+        lastname=data['lastname'],
+        birthdate=birthdate
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"id": new_user.id}), 201
+
+
+
+@app.route('/api/users/<user_id>', methods=['PUT'])
 def update_user(user_id):
-    user = user.query.get_or_404(user_id)
-    data.request.get_json()
-    user.first_name = data.get('first_name', user.first_name)
-    user.last_name = data.get('last_name', user.last_name)
+    user = User.query.get_or_404(user_id)
+    data = request.get_json()
+    user.firstname = data.get('firstname', user.firstname)
+    user.lastname = data.get('lastname', user.lastname)
+    user.birthdate = datetime.strptime(data['birthdate'], '%Y-%m-%d').date()
 
     db.session.commit()
     return jsonify({"message": "Utilisateur modifié avec succès"}), 200

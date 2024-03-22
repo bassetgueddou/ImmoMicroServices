@@ -9,3 +9,14 @@ class Property(db.Model):
     rooms = db.Column(db.Integer, nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', backref=db.backref('properties', lazy=True))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "type": self.type,
+            "city": self.city,
+            "rooms": self.rooms,
+            "owner": self.owner_id
+        }

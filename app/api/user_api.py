@@ -4,7 +4,7 @@ from app.models.user import User
 from datetime import datetime
 
 
-@app.route('/api/users', methods=['POST'])
+@app.route('/api/users/create', methods=['POST'])
 def create_user():
     data = request.get_json()
     birthdate = datetime.strptime(data['birthdate'], '%Y-%m-%d').date()
@@ -19,7 +19,7 @@ def create_user():
 
 
 
-@app.route('/api/users/<user_id>', methods=['PUT'])
+@app.route('/api/users/edite/<user_id>', methods=['PUT'])
 def update_user(user_id):
     user = User.query.get_or_404(user_id)
     data = request.get_json()

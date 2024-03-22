@@ -1,10 +1,16 @@
 from flask import jsonify, request, make_response
 from app import db, app
 from app.models.property import Property
+from sqlalchemy import func
 
 
-@app.route('/api/properties', methods=['POST'])
+
+@app.route('/api/properties/create', methods=['POST'])
 def create_property():
+
+    """ Ici dans le cas ou l'authentification est en place, on pourrait vérifier l'identité du propriétaire ou de l'user afin de lui associer
+    la prop créee."""
+    
     data = request.get_json()
     new_property = Property(
         name=data['name'],
@@ -18,7 +24,7 @@ def create_property():
     db.session.commit()
     return jsonify(new_property.to_dict())
 
-@app.route('/api/properties/<int:property_id>', methods=['PUT'])
+@app.route('/api/properties/edite/<int:property_id>', methods=['PUT'])
 def update_property(property_id):
 
     """Dans le cas ou l'authentification est basée sur un token par exemple, on pourrait vérifier l'identité du propriétaire de la propriété
@@ -60,7 +66,9 @@ def update_property(property_id):
     return jsonify(prop.to_dict()), 200
 
 
-@app.route('/api/properties/city/<cityname>', methods=['GET'])
+@app.route('/api/properties/<cityname>', methods=['GET'])
 def get_properties_by_city(cityname):
-    properties = Property.query.filter_by(city=cityname).all()
+    cityname_convertie = cityname.lower()
+
+    properties = Property.query.filter(func.lower(Property.city) == cityname_convertie).all()
     return jsonify([prop.to_dict() for prop in properties]), 200

@@ -9,7 +9,7 @@ pip (gestionnaire de paquets Python)
 PostgreSQL
 # Configuration de l'environnement
 Clonez le dépôt Git :
-git clone https://github.com/bassetgueddou/ImmoMicroServices.git cd ImmoMicroServices 
+git clone https://github.com/bassetgueddou/ImmoMicroServices.git puis accédez au dissier du projet "cd ImmoMicroServices" 
 
 Configurez un environnement virtuel (facultatif mais recommandé) :
 python -m venv venv 

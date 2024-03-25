@@ -3,6 +3,7 @@ from app.extensions import db
 from app.models.property import Property
 from sqlalchemy import func
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 ns = Namespace('properties', description='Opérations sur les propriétés')
 
@@ -11,20 +12,21 @@ property_model = ns.model('Property', {
     'description': fields.String(required=True, description='Description du bien'),
     'type': fields.String(required=True, description='Type de bien'),
     'city': fields.String(required=True, description='Ville où se trouve le bien'),
-    'rooms': fields.Integer(required=True, description='Nombre de pièces'),
-    'owner_id': fields.Integer(required=False, description='ID du propriétaire')
+    'rooms': fields.Integer(required=True, description='Nombre de pièces')
 })
 
 @ns.route('/create')
 class PropertyCreate(Resource):
-    """ Ici dans le cas ou l'authentification est en place, on pourrait vérifier l'identité du propriétaire ou de l'user afin de lui associer
-    la prop créee."""
+   
 
     @ns.doc('create_property')
+    @jwt_required()
     @ns.expect(property_model)
     def post(self):
         
         """Crée un nouveau bien immo"""
+        current_user_id = get_jwt_identity()
+
         data = request.get_json()
         new_property = Property(
             name=data['name'],
@@ -32,7 +34,7 @@ class PropertyCreate(Resource):
             type=data['type'],
             city=data['city'],
             rooms=data['rooms'],
-            owner_id=data['owner_id']
+            owner_id=current_user_id
         )
         db.session.add(new_property)
         db.session.commit()
@@ -40,23 +42,19 @@ class PropertyCreate(Resource):
 
 @ns.route('/edite/<int:property_id>')
 @ns.param('property_id', 'L\'identifiant de la propriété')
-@ns.param('owner_id', 'L\'identifiant du propriétaire', _in='query')
 class PropertyEdit(Resource):
-    """Dans le cas ou l'authentification est basée sur un token par exemple, on pourrait vérifier l'identité du propriétaire de la propriété
-        en vérifiant le token.
-        exemple : current_user_id = get_current_user_id();
-        if current_user_id != prop.owner_id: On refuse l'accès sinon on continue la modification...
-        Ici, on simule cette vérification en vérifiant que l'id du propriétaire est passé en paramètre de la requête vu qu'on ne gère pas l'authentification dans ce projet. """
+
     @ns.doc('update_property')
+    @jwt_required()
     @ns.expect(property_model)
+
     def put(self, property_id):
         """Met à jour une propriété existante"""
-        mock_owner_id = request.args.get('owner_id', type=int)
-        if not mock_owner_id:
-            return make_response({"erreur": "id du proprio manquant dans la requête"}, 403)
+        current_user_id = get_jwt_identity()
+
         prop = Property.query.get_or_404(property_id)
 
-        if prop.owner_id != mock_owner_id:
+        if prop.owner_id != current_user_id:
             return make_response({"erreur": "Accès refusé : vous n'êtes pas autorisé à modifier cette propriété"}, 403)
 
         data = request.get_json()

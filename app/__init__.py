@@ -12,10 +12,12 @@ def create_app():
     api_restx.init_app(app)
 
     
-    from .api.property_api import ns as property_ns
-    from .api.user_api import ns as user_ns
+    from .api.property.property_api import ns as property_ns
+    from .api.users.user_api import ns as user_ns
+    from .api.auth.auth_api import ns as auth_ns
 
-    api_restx.add_namespace(property_ns, path='/api/properties')
-    api_restx.add_namespace(user_ns, path='/api/users')
+    api_restx.add_namespace(property_ns, path='/api/property/properties')
+    api_restx.add_namespace(user_ns, path='/api/users/users')
+    api_restx.add_namespace(auth_ns, path='/api/auth/auth')
 
     return app

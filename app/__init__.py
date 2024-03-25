@@ -18,6 +18,6 @@ def create_app():
 
     api_restx.add_namespace(property_ns, path='/api/property/properties')
     api_restx.add_namespace(user_ns, path='/api/users/users')
-    api_restx.add_namespace(auth_ns, path='/api/auth/auth')
+    api_restx.add_namespace(auth_ns, path='/api/auth/')
 
     return app

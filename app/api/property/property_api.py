@@ -77,3 +77,21 @@ class PropertyListeByCity(Resource):
         cityname_convertie = cityname.lower()
         properties = Property.query.filter(func.lower(Property.city) == cityname_convertie).all()
         return jsonify([prop.to_dict() for prop in properties])
+
+@ns.route('/delete/<int:property_id>')
+@ns.param('property_id', 'L\'identifiant de la propriété')
+class PropertyDelete(Resource):
+    @ns.doc('delete_property')
+    @jwt_required()
+    def delete(self, property_id):
+        """Supprime une propriété"""
+        current_user_id = get_jwt_identity()
+
+        prop = Property.query.get_or_404(property_id)
+
+        if prop.owner_id != current_user_id:
+            return make_response({"erreur": "Accès refusé : vous n'êtes pas autorisé à supprimer cette propriété"}, 403)
+
+        db.session.delete(prop)
+        db.session.commit()
+        return {"message": "Propriété supprimée avec succès"}, 200
